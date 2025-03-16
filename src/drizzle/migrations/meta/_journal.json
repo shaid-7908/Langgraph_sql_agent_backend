@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1742021653610,
-      "tag": "0000_faulty_blizzard",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1742024660095,
-      "tag": "0001_woozy_silhouette",
+      "when": 1742122656790,
+      "tag": "0000_greedy_frightful_four",
       "breakpoints": true
     }
   ]
