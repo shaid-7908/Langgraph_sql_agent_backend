@@ -1,20 +1,42 @@
-import {db} from '../config/dbConnect'
-import { UserTable } from '../drizzle/schema/user.schema'
-import bcrypt from 'bcrypt'
+import { db } from "../config/dbConnect";
+import { UserTable } from "../drizzle/schema/user.schema";
+import bcrypt from "bcrypt";
+import {eq} from 'drizzle-orm'
 
-export const registerUserservice = async (name:string,email:string,password:string,username:string)=>{
- const hashpassword = await bcrypt.hash(password,10)
- try{
+export const registerUserService = async (
+  name: string,
+  email: string,
+  password: string,
+  username: string
+) => {
+  const hashPassword = await bcrypt.hash(password, 10);
 
-   const result = await db.insert(UserTable).values({
-        name:name,
-        email:email,
-        password:hashpassword,
-        username:username
-    }).$returningId()
-    return {success:true,message:result}
- }catch(error){
+  try {
+    // Check if username already exists
+    const existingUser = await db
+      .select()
+      .from(UserTable)
+      .where(eq(UserTable.username,username))
+      .limit(1);
+
+    if (existingUser.length > 0) {
+      return { success: false, message: "Username is already taken" };
+    }
+
+    // Insert new user
+    const result = await db
+      .insert(UserTable)
+      .values({
+        name: name,
+        email: email,
+        password: hashPassword,
+        username: username,
+      })
+      .$returningId();
+
+    return { success: true, message: result };
+  } catch (error) {
     console.error("Error registering user:", error);
-    return { success: false, message: "User registration failed." };
- }
-}
+    throw new Error("User registration failed");
+  }
+};

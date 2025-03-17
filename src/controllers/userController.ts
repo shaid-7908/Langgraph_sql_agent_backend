@@ -1,6 +1,8 @@
-import { Response, Request } from "express";
-import { registerUserservice } from "../services/userService";
+import { Response, Request, NextFunction } from "express";
+import { registerUserService } from "../services/userService";
 import { z } from "zod";
+import asyncHandler from "../utils/asyncHandler";
+import ApiError from "../utils/apiError";
 
 const registerSchema = z.object({
   name: z.string().min(3, "Name must contain at least 3 characters"),
@@ -19,24 +21,24 @@ const registerSchema = z.object({
   username:z.string().min(3,"Username must contain at least 3 character")
 });
 
-const registerController = async (
+const registerController =asyncHandler( async (
   req: Request,
-  res: Response
+  res: Response,
+  next:NextFunction
 ):Promise<any> => {
   const validRequest = registerSchema.safeParse(req.body);
   if (!validRequest.success) {
-    return res.status(400).json({ zod_erro: validRequest });
+     console.log(validRequest.error.errors)
+    return res.status(400).json(new ApiError(400,'Validation failed',null,validRequest.error.errors))
   }
 
   const { name, email, password ,username} = validRequest.data;
-  try {
-    const user = await registerUserservice(name, email, password,username);
-    return res
+  
+    const user = await registerUserService(name, email, password, username);
+    return res 
       .status(201)
       .json({success: user.success ,message:user.message});
-  } catch (error) {
-    return res.status(500).json({success:false, message: "Internal server error" });
-  }
-};
+  
+});
 
 export { registerController }; // ✅ Use named export

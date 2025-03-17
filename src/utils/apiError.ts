@@ -3,12 +3,13 @@ class ApiError extends Error {
   data: unknown;
   message: string;
   success: boolean;
-  errors: never[];
+  errors: unknown[]; // Changed from never[] to unknown[]
+
   constructor(
     statusCode: number,
     message: string = "Something went wrong",
     data: unknown = null,
-    errors = [],
+    errors: unknown[] = [], // Updated type here as well
     stack = ""
   ) {
     super();
@@ -24,3 +25,5 @@ class ApiError extends Error {
     }
   }
 }
+
+export default ApiError;
