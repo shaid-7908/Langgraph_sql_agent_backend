@@ -15,8 +15,10 @@ const envConfig = {
   MYSQL_USER: process.env.MYSQL_USER as string,
   MYSQL_PASSWORD: process.env.MYSQL_PASSWORD as string,
   MYSQL_DB_NAME: process.env.MYSQL_DB_NAME as string,
-  JWT_SECRET: process.env.JWT_SECRET as string,
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? '2h'
+  JWT_ACCESSTOKEN_SECRET: process.env.JWT_ACCESSTOKEN_SECRET as string,
+  JWT_ACCESSTOKEN_EXPIRES_IN: process.env.JWT_ACCESSTOKEN_EXPIRES_IN ?? "2h" as string,
+  JWT_REFRESHTOKEN_SECRET: process.env.JWT_REFRESHTOKEN_SECRET as string,
+  JWT_REFRESHTOKEN_EXPIRES_IN: process.env.JWT_REFRESHTOKEN_EXPIRES_IN ?? "10d"
 };
 
 export default envConfig;

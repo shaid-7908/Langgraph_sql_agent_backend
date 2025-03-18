@@ -6,4 +6,5 @@ export const UserTable = mysqlTable("user", {
   email:varchar('email',{length:255}),
   username:varchar('username',{length:255}),
   password:varchar('password',{length:255}),
+  refreshToken:varchar('refresh_token',{length:255}),
 });

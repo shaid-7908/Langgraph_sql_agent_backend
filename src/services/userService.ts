@@ -1,7 +1,7 @@
 import { db } from "../config/dbConnect";
 import { UserTable } from "../drizzle/schema/user.schema";
 import bcrypt from "bcrypt";
-import {eq} from 'drizzle-orm'
+import {eq,or} from 'drizzle-orm'
 import ApiError from "../utils/apiError";
 
 export const registerUserService = async (
@@ -17,11 +17,11 @@ export const registerUserService = async (
     const existingUser = await db
       .select()
       .from(UserTable)
-      .where(eq(UserTable.username,username))
+      .where(or(eq(UserTable.username,username),eq(UserTable.email,email)))
       .limit(1);
 
     if (existingUser.length > 0) {
-      return { success: false, message: "Username is already taken" };
+      return { success: false, message: "Username or Email is already taken" };
     }
 
     // Insert new user
@@ -39,6 +39,6 @@ export const registerUserService = async (
   } catch (error:any) {
     console.error("Error registering user:", error);
     //throw new Error(`User registration failed ${error}`);
-    throw new ApiError(500,'Db connection error',null,error)
+    throw new ApiError(500,'Db related error',null,error)
   }
 };

@@ -2,13 +2,16 @@ import { eq, or } from "drizzle-orm";
 import { db } from "../config/dbConnect";
 import { UserTable } from "../drizzle/schema/user.schema";
 import bcrypt from "bcrypt";
+import ApiError from "../utils/apiError";
+import { generateAccessToken,generateRefreshToken } from "../utils/generateToken";
 
-export const authentiacteUser = async (
+const userLoginWithEmailAndUserNameService = async (
   username_email: string,
   password: string
 ) => {
   try {
-    const user = await db
+    // Retrieve the user matching either the username or email.
+    const users = await db
       .select()
       .from(UserTable)
       .where(
@@ -17,17 +20,47 @@ export const authentiacteUser = async (
           eq(UserTable.email, username_email)
         )
       );
-    if (!user.length) throw new Error("User not found");
-    // Check if password exists
-    const userRecord = user[0];
+
+    if (!users.length) {
+      // User not found
+      throw new ApiError(404, "User not found");
+    }
+
+    const userRecord = users[0];
+
     if (!userRecord.password) {
-      throw new Error("Password not set for this user");
+      // Password not set for this user
+      throw new ApiError(400, "Password not set for this user");
     }
-    const isPasswordValid = bcrypt.compare(password, userRecord.password);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
+
+    // Await the password comparison for correct asynchronous handling.
+    const isPasswordValid = await bcrypt.compare(password, userRecord.password);
+
+    if (!isPasswordValid) {
+      // Password does not match
+      throw new ApiError(401, "Invalid password");
     }
-    throw new Error("An unknown error occurred");
+    //generate both token
+    const accessToken = generateAccessToken(userRecord.id)
+    const refreshToken = generateRefreshToken(userRecord.id)
+
+    //update refresh token to db
+    const updateResult = await db
+      .update(UserTable)
+      .set({ refreshToken: refreshToken })
+      .where(eq(UserTable.id, userRecord.id));
+      
+      //if failed to update throw error
+      if(updateResult[0].affectedRows <1){
+        throw new ApiError(500,'Failed update refreshToken')
+      }
+      return {accessToken,refreshToken}
+      
+  } catch (error: any) {
+    console.error("Error authenticating user:", error);
+    // Rethrow a standardized API error for centralized error handling.
+    throw new ApiError(500, "Database related error", null, error);
   }
 };
+
+export {userLoginWithEmailAndUserNameService}
