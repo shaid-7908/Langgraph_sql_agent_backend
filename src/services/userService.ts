@@ -2,6 +2,7 @@ import { db } from "../config/dbConnect";
 import { UserTable } from "../drizzle/schema/user.schema";
 import bcrypt from "bcrypt";
 import {eq} from 'drizzle-orm'
+import ApiError from "../utils/apiError";
 
 export const registerUserService = async (
   name: string,
@@ -35,8 +36,9 @@ export const registerUserService = async (
       .$returningId();
 
     return { success: true, message: result };
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error registering user:", error);
-    throw new Error("User registration failed");
+    //throw new Error(`User registration failed ${error}`);
+    throw new ApiError(500,'Db connection error',null,error)
   }
 };
