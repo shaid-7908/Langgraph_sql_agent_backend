@@ -54,7 +54,9 @@ const userLoginWithEmailAndUserNameService = async (
       if(updateResult[0].affectedRows <1){
         throw new ApiError(500,'Failed update refreshToken')
       }
-      return {accessToken,refreshToken}
+        const userid = userRecord.id
+
+        return {accessToken,refreshToken,userid}
       
   } catch (error: any) {
     console.error("Error authenticating user:", error);
@@ -63,4 +65,15 @@ const userLoginWithEmailAndUserNameService = async (
   }
 };
 
-export {userLoginWithEmailAndUserNameService}
+const logoutService = async(userid:number)=>{
+  
+  try{
+   const updatedRessult = await db.update(UserTable).set({refreshToken:null}).where(eq(UserTable.id,userid))
+   if(updatedRessult[0].affectedRows <1) throw new ApiError(500,'Failed to remove refreshtoken')
+    return {success:true,stattusCode:200,message:'RefreshToken set successfully'}
+    }catch(error){
+     throw new ApiError(500,'Something went worong ')
+  }
+}
+
+export {userLoginWithEmailAndUserNameService,logoutService}
