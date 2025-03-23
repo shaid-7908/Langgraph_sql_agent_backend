@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: envConfig.JWT_SECRET,
+  secretOrKey: envConfig.JWT_ACCESSTOKEN_SECRET,
 };
 
 passport.use(
