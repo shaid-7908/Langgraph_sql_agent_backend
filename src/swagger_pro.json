@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "My API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation using Swagger UI"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "User login using email or username",
+        "tags": ["Auth"],
+        "requestBody": {
+          "description": "Login with email or username and password",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_name_and_email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "400": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/v1/user/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["User"],
+        "requestBody": {
+          "description": "Provide user details for registration",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Invalid input data" }
+        }
+      }
+    }
+  }
+}

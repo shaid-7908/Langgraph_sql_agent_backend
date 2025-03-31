@@ -16,9 +16,11 @@ const envConfig = {
   MYSQL_PASSWORD: process.env.MYSQL_PASSWORD as string,
   MYSQL_DB_NAME: process.env.MYSQL_DB_NAME as string,
   JWT_ACCESSTOKEN_SECRET: process.env.JWT_ACCESSTOKEN_SECRET as string,
-  JWT_ACCESSTOKEN_EXPIRES_IN: process.env.JWT_ACCESSTOKEN_EXPIRES_IN ?? "2h" as string,
+  JWT_ACCESSTOKEN_EXPIRES_IN:
+    process.env.JWT_ACCESSTOKEN_EXPIRES_IN ?? ("2h" as string),
   JWT_REFRESHTOKEN_SECRET: process.env.JWT_REFRESHTOKEN_SECRET as string,
-  JWT_REFRESHTOKEN_EXPIRES_IN: process.env.JWT_REFRESHTOKEN_EXPIRES_IN ?? "10d"
+  JWT_REFRESHTOKEN_EXPIRES_IN: process.env.JWT_REFRESHTOKEN_EXPIRES_IN ?? "10d",
+  GROQ_API_KEY: process.env.GROQ_API_KEY as string
 };
 
 export default envConfig;

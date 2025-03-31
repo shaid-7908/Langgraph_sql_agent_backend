@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler";
 import { UserTable } from "../drizzle/schema/user.schema";
 import { db } from "../config/dbConnect";
 import { or,eq } from "drizzle-orm";
-import { userLoginWithEmailAndUserNameService } from "../services/authService";
+
 import ApiError from "../utils/apiError";
 import bcrypt from 'bcrypt'
 import { generateAccessToken,generateRefreshToken } from "../utils/generateToken";
@@ -46,8 +46,7 @@ const userLoginWithEmailAndUserNameController = asyncHandler(
       if(updateResult[0].affectedRows <1){
         return res.status(500).json(new ApiError(500,'Failed to update refresh token'))
       }
-    // const { accessToken, refreshToken ,userid} =
-    //   await userLoginWithEmailAndUserNameService(user_name_and_email, password);
+    
     return res
       .status(200)
       .cookie("refreshToken", refreshToken, {
