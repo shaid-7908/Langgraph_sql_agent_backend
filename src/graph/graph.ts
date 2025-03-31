@@ -6,14 +6,6 @@ import { dataAnalistAgent } from "./agents/dataAnalistAgent";
 import { StateGraph,END } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { GlobalState } from "./state";
-process.env.LANGCHAIN_API_KEY =
-  "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";
-process.env.LANGCHAIN_CALLBACKS_BACKGROUND = "true";
-process.env.LANGCHAIN_TRACING_V2 = "true";
-process.env.LANGCHAIN_PROJECT = "test_7908";
-// process.env.TAVILY_API_KEY = "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";
-// process.env.GROQ_API_KEY =
-//   "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";
 
 
 //Routers for the graph
