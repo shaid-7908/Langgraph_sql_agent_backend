@@ -6,6 +6,9 @@ import { dataAnalistAgent } from "./agents/dataAnalistAgent";
 import { StateGraph,END } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { GlobalState } from "./state";
+import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
+import { MongoClient } from "mongodb";
+import envConfig from "../config/env.config";
 
 
 //Routers for the graph
@@ -45,6 +48,9 @@ const tools = [sqlExecutorTool]
 
 const toolNode = new ToolNode<typeof GlobalState.State>(tools)
 
+const client = new MongoClient(envConfig.MONGODB_URL)
+const dbName = 'hr_database_op'
+const checkpointer = new MongoDBSaver({client,dbName})
 const graph = new StateGraph(GlobalState)
   .addNode("starter_agent", entryAgent)
   .addNode("question_formatter", questionFormatterAgent)
@@ -64,6 +70,6 @@ const graph = new StateGraph(GlobalState)
   ])
   .addEdge("data_analist", "__end__");
 
-const callableGraph = graph.compile()
+const callableGraph = graph.compile({checkpointer})
 
 export {callableGraph}

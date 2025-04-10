@@ -1,8 +1,13 @@
 import { GlobalState } from "../state";
 import { z } from "zod";
 import { getModel } from "../utils/getModel";
+import { LangGraphRunnableConfig } from "@langchain/langgraph";
+import chatMessage from "../../models/messageModel";
 
-const entryAgent = async (state: typeof GlobalState.State) => {
+const entryAgent = async (
+  state: typeof GlobalState.State,
+  config: LangGraphRunnableConfig
+) => {
   const model = getModel();
   const { messages } = state;
   const possibleOutcome = ["END", "question_formatter"] as const;
@@ -40,12 +45,29 @@ const entryAgent = async (state: typeof GlobalState.State) => {
   const response = await model
     .withStructuredOutput(responseSchema)
     .invoke(input);
-   //format the message as ai message
-    const ai_msg = {
-      role: "ai",
-      content: response.response,
-    };
-    return { messages: ai_msg, nextStep: response.nextStep };
+
+  if (response.nextStep == "END") {
+    const messageUpdate = await chatMessage.findOneAndUpdate(
+      {
+        request_id: config.configurable?.request_id,
+        thread_id: config.configurable?.thread_id,
+      },
+      {
+        sender: "Ai",
+        analysis: response.response,
+        request_id: config.configurable?.request_id,
+        thread_id: config.configurable?.thread_id,
+        sql_query:''
+      },
+      {new:true,upsert:true}
+    );
+  }
+  //format the message as ai message
+  const ai_msg = {
+    role: "ai",
+    content: response.response,
+  };
+  return { messages: ai_msg, nextStep: response.nextStep };
 };
 
-export {entryAgent}
+export { entryAgent };

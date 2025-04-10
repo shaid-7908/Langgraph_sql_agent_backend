@@ -1,14 +1,27 @@
-import { GlobalState } from "../state";
-import {z} from 'zod'
-import { getModel } from "../utils/getModel";
-import { LangGraphRunnableConfig } from "@langchain/langgraph";
-import chatMessage from "../../models/messageModel";
-
-const questionFormatterAgent = async (state:typeof GlobalState.State,config:LangGraphRunnableConfig)=>{
-    const model = getModel()
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.questionFormatterAgent = void 0;
+const zod_1 = require("zod");
+const getModel_1 = require("../utils/getModel");
+const messageModel_1 = __importDefault(require("../../models/messageModel"));
+const questionFormatterAgent = (state, config) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
+    const model = (0, getModel_1.getModel)();
     const { messages } = state;
-    const possibleOutcome = ["END", "database_agent"] as const;
- const SYSTEM_TEMPLATE = `You are an assistant responsible for ensuring that user questions are properly formatted to be sent to the 'database_agent'. Your job is to evaluate the user's input and confirm whether it is clear, well-structured, and sufficient to generate a SQL query.
+    const possibleOutcome = ["END", "database_agent"];
+    const SYSTEM_TEMPLATE = `You are an assistant responsible for ensuring that user questions are properly formatted to be sent to the 'database_agent'. Your job is to evaluate the user's input and confirm whether it is clear, well-structured, and sufficient to generate a SQL query.
 
 ### Guidelines:
 1. **Do Not Generate SQL Queries:** Your task is only to check the clarity and completeness of the question.
@@ -87,42 +100,34 @@ _Response:_
 - Provide helpful clarifications to guide the user in refining their question.
 - If the question is clear, ensure it is correctly formatted without altering the user’s intent.
 `;
-    const responseSchema = z.object({
-      response: z
-        .string()
-        .describe(
-          "A human readable response to the original question. Does not need to be a final response. Will be streamed back to the user."
-        ),
-      nextStep: z
-        .enum(possibleOutcome)
-        .describe("The value of nextStep ,either END or database_agent"),
+    const responseSchema = zod_1.z.object({
+        response: zod_1.z
+            .string()
+            .describe("A human readable response to the original question. Does not need to be a final response. Will be streamed back to the user."),
+        nextStep: zod_1.z
+            .enum(possibleOutcome)
+            .describe("The value of nextStep ,either END or database_agent"),
     });
     const input = [{ role: "system", content: SYSTEM_TEMPLATE }, ...messages];
-    const response = await model
-      .withStructuredOutput(responseSchema)
-      .invoke(input);
-
-      if(response.nextStep == 'END'){
-        const messageUpdate = await chatMessage.findOneAndUpdate(
-          {
-            request_id: config.configurable?.request_id,
-            thread_id: config.configurable?.thread_id,
-          },
-          {
+    const response = yield model
+        .withStructuredOutput(responseSchema)
+        .invoke(input);
+    if (response.nextStep == 'END') {
+        const messageUpdate = yield messageModel_1.default.findOneAndUpdate({
+            request_id: (_a = config.configurable) === null || _a === void 0 ? void 0 : _a.request_id,
+            thread_id: (_b = config.configurable) === null || _b === void 0 ? void 0 : _b.thread_id,
+        }, {
             sender: "Ai",
             analysis: response.response,
-            request_id: config.configurable?.request_id,
-            thread_id: config.configurable?.thread_id,
+            request_id: (_c = config.configurable) === null || _c === void 0 ? void 0 : _c.request_id,
+            thread_id: (_d = config.configurable) === null || _d === void 0 ? void 0 : _d.thread_id,
             sql_query: "",
-          },
-          { new: true, upsert: true }
-        );
-      }
+        }, { new: true, upsert: true });
+    }
     const ai_msg = {
-      role: "ai",
-      content: response.response,
+        role: "ai",
+        content: response.response,
     };
     return { messages: ai_msg, nextStep: response.nextStep };
-}
-
-export {questionFormatterAgent}
+});
+exports.questionFormatterAgent = questionFormatterAgent;

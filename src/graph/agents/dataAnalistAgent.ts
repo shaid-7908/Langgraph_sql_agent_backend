@@ -1,8 +1,10 @@
 import { GlobalState } from "../state";
 import {z} from 'zod'
 import { getModel } from "../utils/getModel";
+import { LangGraphRunnableConfig } from "@langchain/langgraph";
+import chatMessage from "../../models/messageModel";
 
-const dataAnalistAgent = async (state:typeof GlobalState.State)=>{
+const dataAnalistAgent = async (state:typeof GlobalState.State,config:LangGraphRunnableConfig)=>{
       const model = getModel()
       const { sql_result, messages } = state;
       const sliced_sql_result = sql_result[0]?.slice(0, 100) || [];
@@ -29,11 +31,19 @@ Here is the sql results ${response_text}
       const response = await model
         .withStructuredOutput(responseSchema)
         .invoke(input);
+      const messageUpdate = await chatMessage.findOneAndUpdate(
+        {
+          request_id: config.configurable?.request_id,
+          thread_id: config.configurable?.thread_id,
+        },
+        { analysis: response.response },
+        { new: true, upsert: true }
+      );
       const ai_msg = {
         role: "ai",
         content: response.response,
       };
-      return { messages: ai_msg, dataAnalysis: response.response };
+      return { messages: ai_msg };
 }
 
 export {dataAnalistAgent}
